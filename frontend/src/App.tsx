@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 import { Layout } from './components/Layout.js';
 import { ProblemListPage } from './pages/ProblemListPage.js';
 import { ProblemDetailPage } from './pages/ProblemDetailPage.js';
@@ -16,6 +17,7 @@ export default function App() {
           <Route path="/history" element={<HistoryPage />} />
         </Route>
       </Routes>
+      <SpeedInsights />
     </BrowserRouter>
   );
 }
