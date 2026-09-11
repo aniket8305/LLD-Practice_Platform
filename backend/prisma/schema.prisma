@@ -1,0 +1,64 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Problem {
+  id             String   @id @default(uuid())
+  title          String
+  slug           String   @unique
+  description    String
+  requirements   String   // JSON string array
+  hints          String?  // JSON string array
+  rubricTemplate String   // JSON RubricTemplate
+  difficulty     String   @default("medium")
+  createdAt      DateTime @default(now())
+  attempts       Attempt[]
+}
+
+model Attempt {
+  id                 String      @id @default(uuid())
+  problemId          String
+  learnerIdentifier  String
+  attemptNumber      Int
+  status             String      @default("DRAFT")
+  createdAt          DateTime    @default(now())
+  submittedAt        DateTime?
+  evaluatedAt        DateTime?
+  failureReason      String?
+  retryCount         Int         @default(0)
+  idempotencyKey     String?
+  problem            Problem     @relation(fields: [problemId], references: [id])
+  submission         Submission?
+
+  @@unique([problemId, learnerIdentifier, attemptNumber])
+  @@index([learnerIdentifier, problemId])
+  @@index([status])
+}
+
+model Submission {
+  id          String      @id @default(uuid())
+  attemptId   String      @unique
+  format      String      @default("TEXT")
+  content     String      // JSON SubmissionContent
+  rawText     String
+  submittedAt DateTime    @default(now())
+  attempt     Attempt     @relation(fields: [attemptId], references: [id])
+  evaluation  Evaluation?
+}
+
+model Evaluation {
+  id               String   @id @default(uuid())
+  submissionId     String   @unique
+  evaluatorType    String
+  criterionResults String   // JSON CriterionResult[]
+  overallSummary   String?
+  overallScore     Float?
+  metadata         String?  // JSON
+  evaluatedAt      DateTime @default(now())
+  submission       Submission @relation(fields: [submissionId], references: [id])
+}
